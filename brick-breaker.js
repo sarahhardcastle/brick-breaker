@@ -41,24 +41,29 @@ Crafty.scene("inGame", function() {
 			if (bricks[j].id == i) { bricks.splice(j,1);}
 		}
 	}
-	for (var x1=1; x1<9; x1++) {
-		for (var y1=4; y1<12; y1++){
-			bricks.push(Crafty.e('2D, DOM, Collision, brick'+Crafty.math.randomInt(1,5))
-				.attr({x: 40*x1, y: 20*y1, id: (y1-4)+((x1-1)*8)})
-				.onHit('ball', function() {
-					Crafty("Score").score += 1*Crafty('ball').combo;
-					Crafty('ball').combo += 1;
-					if (Math.abs(this.y-Crafty('ball').y) < 20){
-						Crafty('ball').direction *= -1;
-					}
-					console.log(bricks.length);
-					remove(this.id)
-					this.destroy(); 
-				})
-			);
+	function setBricks() {
+		for (var x1=1; x1<9; x1++) {
+			for (var y1=4; y1<12; y1++){
+				bricks.push(Crafty.e('2D, DOM, Collision, brick'+Crafty.math.randomInt(1,5))
+					.attr({x: 40*x1, y: 20*y1, id: (y1-4)+((x1-1)*8)})
+					.onHit('ball', function() {
+						Crafty("Score").score += 1*Crafty('ball').combo;
+						Crafty('ball').combo += 1;
+						if (Math.abs(this.y-Crafty('ball').y) < 20){
+							Crafty('ball').direction *= -1;
+						}
+						remove(this.id);
+						if (bricks.length==0){
+							setBricks();
+							Crafty('ball').speed++;
+						}
+						this.destroy(); 
+					})
+				);
+			}
 		}
 	}	
-
+	setBricks();
 	
 	//paddle
 	Crafty.e("Player, 2D, DOM, Color, Multiway")
@@ -68,7 +73,7 @@ Crafty.scene("inGame", function() {
 
 	//ball
 	Crafty.e("2D, DOM, Collision, ball")
-		.attr({x:195, y:530, w:20, h:20, combo: 0, speed: 5,
+		.attr({x:195, y:530, w:20, h:20, combo: 1, speed: 5,
 		direction: Crafty.math.randomInt(-3*Math.PI/4, -Math.PI/4)})
 		.bind('EnterFrame', function(){
 			//hit sides
