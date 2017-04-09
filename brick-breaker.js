@@ -10,11 +10,12 @@ var assets = {
 			"tileh": 20,
 			"map": {
 				"brick1": [0,0,2,1],
-				"brick2": [1,0,2,1],
-				"brick3": [2,0,2,1],
-				"brick4": [3,0,2,1],		
-				"brick5": [3,0,2,1],
-				"ball": [0,1]
+				"brick2": [2,0,2,1],
+				"brick3": [4,0,2,1],
+				"brick4": [6,0,2,1],		
+				"brick5": [8,0,2,1],
+				"ball": [0,1],
+				"qMark": [1,1]
 			}
 		}
 	}
@@ -22,7 +23,7 @@ var assets = {
 
 Crafty.scene("loading", function(){
 	Crafty.load(assets, function() {
-		Crafty.scene("inGame");
+		Crafty.scene("start");
 	});	
 });
 
@@ -58,22 +59,35 @@ Crafty.scene("inGame", function() {
 				Crafty.scene("endGame", score);
 			}
 		
-			this.x += 3 * Math.cos(this.direction);
-			this.y += 3 * Math.sin(this.direction);
+			this.x += 5 * Math.cos(this.direction);
+			this.y += 5 * Math.sin(this.direction);
 		})
 		.onHit('Player', function(){
-			Crafty("Score").score += 1;
+			this.combo = 1;
 			this.direction *= -1;
 		});
-
+	
+	//bricks
+	for (var x1=1; x1<9; x1++) {
+		for (var y1=4; y1<12; y1++){
+			var brick = Crafty.e('2D, DOM, Collision, brick'+Crafty.math.randomInt(1,5))
+				.attr({x: 40*x1, y: 20*y1})
+				.onHit('ball', function() {
+					Crafty("Score").score += 1*Crafty('ball').combo;
+					Crafty('ball').combo += 1;
+					this.destroy();
+				});
+		}
+	}	
+	
 	//Score	
  	Crafty.e("Score, 2D, DOM, Text")
 		.attr({x:0, y:0, score: 0})
 		.textColor('#EEE')
-		.textFont({size:'24px', weight:'bold'})
+		.textFont({size:'24px', weight:'bold', family:'monospace'})
 		.textAlign('left')
 		.text(function() {return "Score: " + this.score;})
-		.dynamicTextGeneration(true)
+		.dynamicTextGeneration(true);
 });
 
 //game over, displays score
@@ -83,26 +97,26 @@ Crafty.scene("endGame", function(score) {
 	Crafty.e("2D, DOM, Text")
 		.attr({w:400, h:100, x:0, y:200})
 		.textColor('#EEE')
-		.textFont({size:'40px', weight:'bold'})
+		.textFont({size:'40px', weight:'bold', family:'monospace'})
 		.textAlign('center')
 		.text("Game Over");
 	//Score information
 	Crafty.e("2D, DOM, Text")
 		.attr({w:400, h:100, x:0, y:250})
 		.textColor('#EEE')
-		.textFont({size:'40px', weight:'bold'})
+		.textFont({size:'40px', weight:'bold', family:'monospace'})
 		.textAlign('center')
 		.text("Score: " + score);
 	Crafty.e("2D, DOM, Text")
 		.attr({w:400, h:100, x:0, y:300})
 		.textColor('#EEE')
-		.textFont({size:'40px', weight:'bold'})
+		.textFont({size:'40px', weight:'bold', family:'monospace'})
 		.textAlign('center')
 		.text("High Score: " + Crafty.storage("highscore"));
 	Crafty.e("2D, DOM, Text")
 		.attr({w:400, h:100, x:0, y:350})
 		.textColor('#EEE')
-		.textFont({size:'20px', weight:'bold'})
+		.textFont({size:'20px', weight:'bold', family:'monospace'})
 		.textAlign('center')
 		.text("PRESS SPACE TO START")
 		.bind('KeyDown', function(e) {
@@ -110,8 +124,66 @@ Crafty.scene("endGame", function(score) {
 				Crafty.scene("inGame");
 			}
 		});
-	
+	Crafty.e("2D, DOM, Mouse,qMark")
+		.attr({w:40, h:40, x:5, y:5})
+		.bind('Click', function(MouseEvent){
+			Crafty.scene("about");
+		});	
 });
+
+Crafty.scene("start", function(){
+	Crafty.background('#001');
+	Crafty.e("2D, DOM, Text")
+		.attr({w:400, h:100, x:0, y:200})
+		.textColor('#EEE')
+		.textFont({size:'40px', weight:'bold', family:'monospace'})
+		.textAlign('center')
+		.text("BRICK BREAKER");
+	Crafty.e("2D, DOM, Text")
+		.attr({w:400, h:100, x:0, y:250})
+		.textColor('#EEE')
+		.textFont({size:'20px', weight:'bold', family:'monospace'})
+		.textAlign('center')
+		.text("SCORE\xa0 TO\xa0 BEAT :\xa0 " + Crafty.storage("highscore"));
+	Crafty.e("2D, DOM, Text")
+		.attr({w:400, h:100, x:0, y:280})
+		.textColor('#EEE')
+		.textFont({size:'20px', weight:'bold', family:'monospace'})
+		.textAlign('center')
+		.text("PRESS\xa0 SPACE\xa0 TO\xa0 START")
+		.bind('KeyDown', function(e) {
+			if (e.key == Crafty.keys.SPACE) {
+				Crafty.scene("inGame");
+			}
+		});
+	Crafty.e("2D, DOM, Mouse,qMark")
+		.attr({w:40, h:40, x:5, y:5})
+		.bind('Click', function(MouseEvent){
+			Crafty.scene("about");
+		});
+});
+
+Crafty.scene("about", function(){
+	Crafty.background('#001');
+	Crafty.e("2D, DOM, Text, Mouse")
+		.attr({w:400, h:500, x:0, y:50})
+		.textColor('#EEE')
+		.textFont({size:'20px', weight:'bold', family:'monospace'})
+		.textAlign('center')
+		.text("- - - - - - - - - - BRICK BREAKER - - - - - - - - - \n - - -\xa0\xa0GAME BUILT USING CRAFTYJS\xa0\xa0- - -");  
+	Crafty.e("2D, DOM, Text")
+		.attr({w:400, h:100, x:0, y:450})
+		.textColor('#EEE')
+		.textFont({size:'20px', weight:'bold', family:'monospace'})
+		.textAlign('center')
+		.text("PRESS SPACE TO RETURN TO START SCREEN")
+		.bind('KeyDown', function(e) {
+			if (e.key == Crafty.keys.SPACE) {
+				Crafty.scene("start");
+			}
+		});
+});
+
 
 Crafty.scene("loading");
 
