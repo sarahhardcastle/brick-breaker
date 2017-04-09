@@ -1,6 +1,8 @@
 window.onload = function() {
 Crafty.init(400,600,document.getElementById('game'));
-
+if (typeof Crafty.storage("highscore") === "undefined") {
+	Crafty.storage("highscore", 0);
+}
 var assets = {
 	"sprites": {
 		"sprites.png": {
@@ -49,14 +51,18 @@ Crafty.scene("inGame", function() {
 				this.direction *= -1;
 			}
 			if (this.y > 535) {
-				Crafty.scene("endGame", Crafty("Score").score);
+				var score = Crafty("Score").score;
+				if (score > Crafty.storage("highscore")){
+					Crafty.storage("highscore", score);
+				}
+				Crafty.scene("endGame", score);
 			}
 		
 			this.x += 3 * Math.cos(this.direction);
 			this.y += 3 * Math.sin(this.direction);
 		})
 		.onHit('Player', function(){
-			this.combo = 0;
+			Crafty("Score").score += 1;
 			this.direction *= -1;
 		});
 
@@ -79,14 +85,32 @@ Crafty.scene("endGame", function(score) {
 		.textColor('#EEE')
 		.textFont({size:'40px', weight:'bold'})
 		.textAlign('center')
-		.text("Game Over")
+		.text("Game Over");
 	//Score information
 	Crafty.e("2D, DOM, Text")
 		.attr({w:400, h:100, x:0, y:250})
 		.textColor('#EEE')
 		.textFont({size:'40px', weight:'bold'})
 		.textAlign('center')
-		.text("Score: " + score)
+		.text("Score: " + score);
+	Crafty.e("2D, DOM, Text")
+		.attr({w:400, h:100, x:0, y:300})
+		.textColor('#EEE')
+		.textFont({size:'40px', weight:'bold'})
+		.textAlign('center')
+		.text("High Score: " + Crafty.storage("highscore"));
+	Crafty.e("2D, DOM, Text")
+		.attr({w:400, h:100, x:0, y:350})
+		.textColor('#EEE')
+		.textFont({size:'20px', weight:'bold'})
+		.textAlign('center')
+		.text("PRESS SPACE TO START")
+		.bind('KeyDown', function(e) {
+			if (e.key == Crafty.keys.SPACE) {
+				Crafty.scene("inGame");
+			}
+		});
+	
 });
 
 Crafty.scene("loading");
