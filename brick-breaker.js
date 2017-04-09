@@ -31,6 +31,34 @@ Crafty.scene("loading", function(){
 //playing game
 Crafty.scene("inGame", function() {
 	Crafty.background('#001');
+
+	
+	//bricks
+	var bricks = [];
+	function remove(i){
+		console.log("removing "+i);
+		for (j=0; j<bricks.length; j++){
+			if (bricks[j].id == i) { bricks.splice(j,1);}
+		}
+	}
+	for (var x1=1; x1<9; x1++) {
+		for (var y1=4; y1<12; y1++){
+			bricks.push(Crafty.e('2D, DOM, Collision, brick'+Crafty.math.randomInt(1,5))
+				.attr({x: 40*x1, y: 20*y1, id: (y1-4)+((x1-1)*8)})
+				.onHit('ball', function() {
+					Crafty("Score").score += 1*Crafty('ball').combo;
+					Crafty('ball').combo += 1;
+					if (Math.abs(this.y-Crafty('ball').y) < 20){
+						Crafty('ball').direction *= -1;
+					}
+					console.log(bricks.length);
+					remove(this.id)
+					this.destroy(); 
+				})
+			);
+		}
+	}	
+
 	
 	//paddle
 	Crafty.e("Player, 2D, DOM, Color, Multiway")
@@ -40,7 +68,7 @@ Crafty.scene("inGame", function() {
 
 	//ball
 	Crafty.e("2D, DOM, Collision, ball")
-		.attr({x:195, y:530, w:20, h:20, combo: 0,
+		.attr({x:195, y:530, w:20, h:20, combo: 0, speed: 5,
 		direction: Crafty.math.randomInt(-3*Math.PI/4, -Math.PI/4)})
 		.bind('EnterFrame', function(){
 			//hit sides
@@ -59,26 +87,13 @@ Crafty.scene("inGame", function() {
 				Crafty.scene("endGame", score);
 			}
 		
-			this.x += 5 * Math.cos(this.direction);
-			this.y += 5 * Math.sin(this.direction);
+			this.x += this.speed * Math.cos(this.direction);
+			this.y += this.speed * Math.sin(this.direction);
 		})
 		.onHit('Player', function(){
 			this.combo = 1;
 			this.direction *= -1;
 		});
-	
-	//bricks
-	for (var x1=1; x1<9; x1++) {
-		for (var y1=4; y1<12; y1++){
-			var brick = Crafty.e('2D, DOM, Collision, brick'+Crafty.math.randomInt(1,5))
-				.attr({x: 40*x1, y: 20*y1})
-				.onHit('ball', function() {
-					Crafty("Score").score += 1*Crafty('ball').combo;
-					Crafty('ball').combo += 1;
-					this.destroy();
-				});
-		}
-	}	
 	
 	//Score	
  	Crafty.e("Score, 2D, DOM, Text")
