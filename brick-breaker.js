@@ -1,22 +1,29 @@
 window.onload = function() {
 Crafty.init(400,600,document.getElementById('game'));
 
-/*
-Crafty.sprite("sprites.png", {
-	brick1: [0,0,15,8],
-	brick2: [15,0,15,8],
-	brick3: [30,0,15,8],
-	brick4: [45,0,15,8],		
-	brick5: [60,0,15,8],
-	ball: [0,8,10,10]
-});
+var assets = {
+	"sprites": {
+		"sprites.png": {
+			"tile": 20,
+			"tileh": 20,
+			"map": {
+				"brick1": [0,0,2,1],
+				"brick2": [1,0,2,1],
+				"brick3": [2,0,2,1],
+				"brick4": [3,0,2,1],		
+				"brick5": [3,0,2,1],
+				"ball": [0,1]
+			}
+		}
+	}
+};
 
 Crafty.scene("loading", function(){
-	Crafty.load(["sprites.png"], function() {
+	Crafty.load(assets, function() {
 		Crafty.scene("inGame");
 	});	
 });
-*/
+
 
 //playing game
 Crafty.scene("inGame", function() {
@@ -29,10 +36,9 @@ Crafty.scene("inGame", function() {
 		.multiway(150, {LEFT_ARROW: 180, RIGHT_ARROW:0});
 
 	//ball
-	Crafty.e("2D, DOM, Color, Collision")
-		.attr({x:195, y:540, w:10, h:10, combo: 0,
+	Crafty.e("2D, DOM, Collision, ball")
+		.attr({x:195, y:530, w:20, h:20, combo: 0,
 		direction: Crafty.math.randomInt(-3*Math.PI/4, -Math.PI/4)})
-		.color('#EEF')
 		.bind('EnterFrame', function(){
 			//hit sides
 			if (this.x < 0 || this.x > 390) {
@@ -42,7 +48,7 @@ Crafty.scene("inGame", function() {
 			if (this.y < 0) {
 				this.direction *= -1;
 			}
-			if (this.y > 600) {
+			if (this.y > 535) {
 				Crafty.scene("endGame", Crafty("Score").score);
 			}
 		
@@ -83,6 +89,6 @@ Crafty.scene("endGame", function(score) {
 		.text("Score: " + score)
 });
 
-Crafty.scene("inGame");
+Crafty.scene("loading");
 
 };
