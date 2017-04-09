@@ -97,7 +97,7 @@ Crafty.scene("inGame", function() {
 		})
 		.onHit('Player', function(){
 			this.combo = 1;
-			this.direction *= -1;
+			this.direction = (this.x-(Crafty('Player').x+70))*(Math.PI)/80;
 		});
 	
 	//Score	
